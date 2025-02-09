@@ -128,6 +128,7 @@ function updateCart() {
 
             // Update mini cart UI
             updateCart();
+            updateConfirmCart();
 
             // Remove from the confirm cart
             document.querySelectorAll('.confirm-item').forEach((confirmItem) => {
@@ -136,12 +137,22 @@ function updateCart() {
                     confirmItem.remove();
                 }
             });
+            document.querySelectorAll('.product-item').forEach((productItem) => {
+              let productItemName = productItem.querySelector('.product-name')?.textContent.trim();
+              if (productItemName === itemName) {
+                productItem.classList.remove('active');
+                let btn = productItem.querySelector('.add-btn');
+                if (btn) {
+                  btn.classList.remove('active');
+                  btn.innerHTML = 'Add To Cart';
+                }
+              }
+            });
         });
     });
 });
 
 }
-
 
 
 // add to cart 
@@ -176,6 +187,7 @@ document.querySelectorAll('.add-btn').forEach((button) => {
         </div>`;
 
       updateCart();
+      updateConfirmCart();
       const itemQuantity = button.querySelector('.item-quantity');
       const increment = button.querySelector('.increment');
       const decrement = button.querySelector('.decrement');
@@ -222,109 +234,137 @@ function updateCartQuantity(productName, newQuantity) {
     cartItem.quantity = newQuantity;
   }
   updateCart(); 
+  updateConfirmCart();
 }
 
 function removeProductFromCart(productName) {
   cart = cart.filter(item => item.name !== productName);
   updateCart(); 
+  updateConfirmCart();
 }
+
+
 
 
 // Function to handle cart
 let cartBtn = document.querySelector('.cart-btn');
 cartBtn.addEventListener('click', () => {
-
   let checkoutForm = document.querySelector('.checkout-form');
   checkoutForm.classList.add('slide-bottom');
 
   let confirmCart = document.querySelector('.confirm-cart');
-  // Show the confirm cart modal
   confirmCart.classList.remove('d-none', 'slide-up', 'slide-up-2', 'slide-bottom');
   confirmCart.classList.add('slide-up');
 
-
-  let confirmContent = confirmCart.querySelector('.confirm-content');
-  confirmContent.innerHTML = ''; 
-
-  cart.forEach((item, index) => {
-// Create the cart item
-    let cartItem = document.createElement('div');
-    cartItem.classList.add('confirm-item', 'position-relative', 'd-flex', 'align-items-center');
-
-    // Set innerHTML with a data-index for the remove button
-    cartItem.innerHTML = `
-      <img src="${item.image}" class="img-fluid confirm-img" alt="${item.name}">
-      <div class="cart-item-detail">
-        <div class="item-name">${item.name}</div>
-        <div class="confirm-item-quantity d-flex justify-content-between align-items-center">
-          <div class="item-quantity-price">
-            <span class="quantity">${item.quantity}x</span>
-            <span class="price">@${item.price}tk</span>
-          </div>
-          <div class="confirm-total-price">
-            <span>${(item.quantity * item.price)}tk</span>
-          </div>
-          <span class="remove-btn"><i class="bi bi-x" data-index="${index}"></i></span>
-        </div>
-      </div>
-    `;
-
-    // Append the cart item to the confirm-content
-    confirmContent.appendChild(cartItem);
-  });
-
-  // Update total order price
-  let completeOrder = confirmCart.querySelector('.complete-order h4');
-  let completePrice = cart.reduce((total, item) => total + item.quantity * item.price, 0);
-  completeOrder.textContent = `${completePrice}tk`;
-
-  // Add event listeners to remove buttons
-  document.querySelectorAll('.remove-btn i').forEach((removeBtn) => {
-    removeBtn.addEventListener('click', (e) => {
-        const parentItem = e.target.closest('.confirm-item');
-        const itemName = parentItem.querySelector('.item-name').textContent.trim();
-        parentItem.classList.add('remove');
-
-        parentItem.addEventListener('transitionend', () => {
-           
-            parentItem.remove();
-
-            // Find and remove the item from the cart array
-            const itemIndex = cart.findIndex(item => item.name === itemName);
-            if (itemIndex !== -1) {
-                cart.splice(itemIndex, 1);
-            }
-
-           
-            updateCart();
-
-            // Check if the confirm cart is empty and perform necessary actions
-            const confirmCart = document.querySelector('.confirm-cart');
-            const confirmContent = confirmCart.querySelector('.confirm-content');
-            if (confirmContent.children.length === 0) {
-                document.querySelector('.cart-body').classList.add('d-none');
-                document.querySelectorAll('.product-item').forEach(item => item.classList.remove('active'));
-                document.querySelectorAll('.add-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                    btn.innerHTML = 'Add To Cart';
-                });
-                confirmCart.classList.add('slide-bottom');
-                setTimeout(() => {
-                    confirmCart.classList.add('d-none');
-                }, 600);
-            }
-
-            // Update the complete order price
-            const completeOrder = confirmCart.querySelector('.complete-order h4');
-            const completePrice = cart.reduce((total, item) => total + item.quantity * item.price, 0);
-            completeOrder.textContent = `${completePrice}tk`;
-        }, { once: true }); // Ensure the event listener is called only once
-    });
-  });
-
-
- 
+  updateConfirmCart(); 
 });
+
+
+
+function updateConfirmCart() {
+  let confirmCart2 = document.querySelector('.confirm-cart-2');
+  let confirmBody = confirmCart2.querySelector('.confirm-body');
+  let emptyCartMsg = document.querySelector('.empty-cart-message');
+
+  let confirmCarts = document.querySelectorAll('.confirm-cart, .confirm-cart-2');
+
+  confirmCarts.forEach(confirmCart => {
+      let confirmContent = confirmCart.querySelector('.confirm-content');
+      if (!confirmContent) return;
+      confirmContent.innerHTML = ''; 
+
+      if (cart.length > 0) {
+          confirmBody.classList.remove('d-none');  
+          emptyCartMsg.classList.add('d-none');  
+      } else {
+          confirmBody.classList.add('d-none');  
+          emptyCartMsg.classList.remove('d-none');  
+      }
+
+      cart.forEach((item, index) => {
+          let cartItem = document.createElement('div');
+          cartItem.classList.add('confirm-item', 'position-relative', 'd-flex', 'align-items-center');
+
+          cartItem.innerHTML = `
+              <img src="${item.image}" class="img-fluid confirm-img" alt="${item.name}">
+              <div class="cart-item-detail">
+                  <div class="item-name">${item.name}</div>
+                  <div class="confirm-item-quantity d-flex justify-content-between align-items-center">
+                      <div class="item-quantity-price">
+                          <span class="quantity">${item.quantity}x</span>
+                          <span class="price">@${item.price}tk</span>
+                      </div>
+                      <div class="confirm-total-price">
+                          <span>${(item.quantity * item.price)}tk</span>
+                      </div>
+                      <span class="remove-btn"><i class="bi bi-x" data-index="${index}"></i></span>
+                  </div>
+              </div>
+          `;
+
+          confirmContent.appendChild(cartItem);
+      });
+
+      // Update total order price
+      let completeOrder = confirmCart.querySelector('.complete-order h4');
+      let completePrice = cart.reduce((total, item) => total + item.quantity * item.price, 0);
+      completeOrder.textContent = `${completePrice}tk`;
+
+      // Add event listeners for remove buttons
+      confirmContent.querySelectorAll('.remove-btn i').forEach(removeBtn => {
+          removeBtn.addEventListener('click', (e) => {
+              let parentItem = e.target.closest('.confirm-item');
+              let itemName = parentItem.querySelector('.item-name').textContent.trim();
+
+              parentItem.classList.add('remove');
+              parentItem.addEventListener('transitionend', () => {
+                  parentItem.remove();
+
+                  // Remove item from cart array
+                  const itemIndex = cart.findIndex(item => item.name === itemName);
+                  if (itemIndex !== -1) {
+                      cart.splice(itemIndex, 1);
+                  }
+
+                  updateCart();
+                  updateConfirmCart();
+                  
+                  document.querySelectorAll('.product-item').forEach((productItem) => {
+                    let productItemName = productItem.querySelector('.product-name')?.textContent.trim();
+                    if (productItemName === itemName) {
+                      productItem.classList.remove('active');
+                      let btn = productItem.querySelector('.add-btn');
+                      if (btn) {
+                        btn.classList.remove('active');
+                        btn.innerHTML = 'Add To Cart';
+                      }
+                    }
+                  });
+
+                  // If cart is empty, hide confirm-cart 
+                  let confirmCart = document.querySelector('.confirm-cart');
+                  if (cart.length === 0) {
+                      confirmCart.classList.add('slide-bottom');
+                      setTimeout(() => confirmCart.classList.add('d-none'), 600);
+
+                      confirmBody.classList.add('d-none');  // Hide confirm body
+                      emptyCartMsg.classList.remove('d-none');  // Show empty cart message
+
+                      // Reset buttons
+                      document.querySelectorAll('.product-item').forEach(item => item.classList.remove('active'));
+                      document.querySelectorAll('.add-btn').forEach(btn => {
+                          btn.classList.remove('active');
+                          btn.innerHTML = 'Add To Cart';
+                      });
+                  }
+              }, { once: true });
+          });
+      });
+  });
+}
+
+
+
 
 // Function to handle confirm back btn
 document.querySelector('#confirm-back-btn').addEventListener('click', (e) => {

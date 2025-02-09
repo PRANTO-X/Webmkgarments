@@ -36,6 +36,34 @@
     transform: translate(-50%,-50%);
 }
 
+#billing .container-lg{
+    background: var(--active-color);
+    border-radius: 25px;
+}
+
+.checkout-form-2{
+    padding: 40px;
+}
+
+.confirm-cart-2 {
+    padding: 40px;
+    background: var(--highlight-color);
+    border-radius: 0 25px 25px 50px;
+}
+
+.confirm-body{
+    background: var(--white);
+    padding: 20px;
+    border-radius: 20px;
+}
+
+.empty-cart-message p{
+    font-size: 22px;
+    margin-top: 15px;
+    font-weight: 700;
+    color: var(--white);
+}
+
 
 .confirm-cart.slide-up {
     animation: slideUp 0.5s ease forwards;
@@ -167,9 +195,13 @@
 
   /* navbar */
   header{
-    position: relative;
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 10;
     background: var(--primary-color);
+    z-index: 1000000;
   }
 
   nav{
@@ -827,3 +859,6 @@ footer{
     padding-bottom: 20px;
 }
 
+#billing{
+    padding: 5px 0 50px 0;
+}

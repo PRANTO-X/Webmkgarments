@@ -99,6 +99,9 @@
         height: 35px;
         font-size: 16px;
     }
+    .confirm-cart-2 {
+        border-radius: 0 0px 25px 25px;
+    }
 }
 
 @media (max-width: 820px){
